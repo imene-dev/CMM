@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"> 
+<title>Segmentation Vidéo</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #f5f5f5;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    justify-content: center;
+  }
+h1 {
+      margin-top: 40px;
+      font-size: 2rem;
+      color: #00ffc6;
+      text-shadow: 0 0 12px rgba(0,255,198,0.4);
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+  .container {
+    background: rgba(255,255,255,0.1);
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  input[type="file"], input[type="number"], button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    width: 220px;
+    margin: top 40px; ;
+  }
+
+  input[type="file"] {
+    background: #00ffc6;
+    color: #000;
+    margin-top: 40px;
+  }
+
+  input[type="number"] {
+    text-align: center;
+  }
+
+  button {
+    background: linear-gradient(135deg, #00ffc6, #00b8ff);
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+  }
+
+  .status {
+    margin-top: 15px;
+    color: #ddd;
+  }
+</style>
+</head>
+<body>
+
+  <h1> Segmentation </h1>
+
+  <div class="container">
+    <input type="file" id="videoFile" accept="video/*">
+    <input type="number" id="segmentDuration" placeholder="Durée du segment" min="1" value="10">
+    <button id="segmentBtn">Segmenter</button>
+    <p class="status" id="status"></p>
+  </div>
+
+  <script>
+   document.getElementById('segmentBtn').addEventListener('click', async () => {
+  const fileInput = document.getElementById('videoFile');
+  const durationInput = document.getElementById('segmentDuration');
+  const status = document.getElementById('status');
+
+  if (!fileInput.files.length) {
+    status.textContent = "⚠️ Veuillez importer une vidéo.";
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  // Vérifie que le fichier est bien une vidéo
+  if (!file.type.startsWith('video/')) {
+    status.textContent = "⚠️ Le fichier sélectionné n'est pas une vidéo !";
+    return;
+  }
+
+  const duration = durationInput.value;
+
+  const formData = new FormData();
+  formData.append('video', file);
+  formData.append('duration', duration);
+
+  status.textContent = "⏳ Segmentation en cours...";
+
+  try {
+    const response = await fetch('http://127.0.0.1:5000/segment', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      status.textContent = "✅ Segmentation terminée !";
+      const data = await response.json();
+      console.log(data);
+    } else {
+      status.textContent = "❌ Erreur côté serveur.";
+    }
+  } catch (error) {
+    status.textContent = "❌ Erreur : " + error.message;
+  }
+});
+
+  </script>
+
+</body>
+</html>

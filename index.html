@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Player</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Poppins', sans-serif;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin-top: 40px;
+      font-size: 2.2rem;
+      color: #00ffc6;
+      text-shadow: 0 0 15px rgba(0,255,198,0.5);
+    }
+
+    .upload-section {
+      margin-top: 30px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px 40px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: 0.3s ease;
+    }
+
+    .upload-section:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 35px rgba(0,255,198,0.2);
+    }
+
+    input[type="file"] {
+      background: linear-gradient(135deg, #00ffc6, #00b8ff);
+      color: #0b0b0b;
+      border: none;
+      border-radius: 30px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="file"]:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #00b8ff, #00ffc6);
+    }
+
+    .video-container {
+      position: relative;
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      max-width: 800px;
+      width: 90%;
+      display: none;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    button {
+      background: linear-gradient(135deg, #00ffc6, #00b8ff);
+      border: none;
+      border-radius: 25px;
+      color: #0b0b0b;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #00b8ff, #00ffc6);
+    }
+
+    .timer {
+      font-size: 13px;
+      color: #ddd;
+      letter-spacing: 0.5px;
+    }
+
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #00ffc6;
+      font-size: 2rem;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .arrow:hover {
+      background: rgba(0,255,198,0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    #prevBtn { left: 10px; }
+    #nextBtn { right: 10px; }
+
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      width: 100%;
+    }
+
+    footer span {
+      color: #00ffc6;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Video Player</h1>
+  <div class="upload-section">
+    <p>Select videos to upload :</p>
+    <input type="file" id="videoInput" accept="video/*" multiple>
+  </div>
+
+  <div class="video-container" id="videoContainer">
+    <button class="arrow" id="prevBtn">⮜</button>
+
+    <video id="mainVideo" controls></video>
+    <div class="controls">
+      <button id="playBtn">Lecture</button>
+      <span class="timer" id="timer">00:00 / 00:00</span>
+    </div>
+
+    <button class="arrow" id="nextBtn">⮞</button>
+  </div>
+
+  <footer>
+     <span>Imene</span> - <span>Alae</span>
+  </footer>
+
+  <script>
+    const videoInput = document.getElementById('videoInput');
+    const videoContainer = document.getElementById('videoContainer');
+    const mainVideo = document.getElementById('mainVideo');
+    const playBtn = document.getElementById('playBtn');
+    const timer = document.getElementById('timer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let videos = [];
+    let currentIndex = 0;
+
+    // Gestion des fichiers sélectionnés
+    videoInput.addEventListener('change', (event) => {
+      const files = Array.from(event.target.files);
+      if (files.length === 0) return;
+
+      // Filtrer uniquement les fichiers vidéos
+      const videoFiles = files.filter(file => file.type.startsWith('video/'));
+
+      if (videoFiles.length === 0) {
+        alert("⚠️ Seules les vidéos sont autorisées !");
+        videoInput.value = ""; // réinitialise l'input
+        return;
+      }
+
+      // Crée les URLs pour les vidéos valides
+      const newVideos = videoFiles.map(file => URL.createObjectURL(file));
+      videos.push(...newVideos);
+
+      // Affiche la première vidéo si c'est la première fois
+      if (videos.length === newVideos.length) {
+        currentIndex = 0;
+        loadVideo(currentIndex);
+        videoContainer.style.display = 'block';
+      }
+    });
+
+    function loadVideo(index) {
+      mainVideo.src = videos[index];
+      mainVideo.load();
+      mainVideo.addEventListener('loadeddata', () => {
+        mainVideo.play();
+        playBtn.textContent = 'Pause';
+      }, { once: true });
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (mainVideo.paused) {
+        mainVideo.play();
+        playBtn.textContent = 'Pause';
+      } else {
+        mainVideo.pause();
+        playBtn.textContent = 'Lecture';
+      }
+    });
+
+    mainVideo.addEventListener('timeupdate', () => {
+      const current = formatTime(mainVideo.currentTime);
+      const total = formatTime(mainVideo.duration);
+      timer.textContent = `${current} / ${total}`;
+    });
+
+    mainVideo.addEventListener('ended', () => {
+      playBtn.textContent = 'Lecture';
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (videos.length === 0) return;
+      currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+      loadVideo(currentIndex);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (videos.length === 0) return;
+      currentIndex = (currentIndex + 1) % videos.length;
+      loadVideo(currentIndex);
+    });
+
+    function formatTime(time) {
+      if (isNaN(time)) return '00:00';
+      const min = Math.floor(time / 60);
+      const sec = Math.floor(time % 60);
+      return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
