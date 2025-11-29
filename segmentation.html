@@ -1,134 +1,199 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="UTF-8"> 
-<title>Segmentation Vidéo</title>
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: #f5f5f5;
-    font-family: 'Poppins', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    justify-content: center;
-  }
-h1 {
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segmentation vidéo</title>
+
+  <style>
+    /* 🎨 Ton design original conservé */
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #141E30, #243B55);
+      font-family: 'Poppins', sans-serif;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
       margin-top: 40px;
       font-size: 2rem;
       color: #00ffc6;
-      text-shadow: 0 0 12px rgba(0,255,198,0.4);
-      letter-spacing: 1px;
+    }
+
+    .form-box {
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 30px 40px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    input,
+    button {
+      border: none;
+      border-radius: 25px;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    input[type="file"] {
+      background: linear-gradient(135deg, #00ffc6, #00b8ff);
+      color: #0b0b0b;
+      width: 100%;
+    }
+
+    input[type="number"] {
+      width: 80%;
+      text-align: center;
+      border: 2px solid #00ffc6;
+      background: transparent;
+      color: white;
+    }
+
+    button {
+      background: linear-gradient(135deg, #00ffc6, #00b8ff);
+      color: #0b0b0b;
+      font-weight: 700;
+    }
+
+    .progress {
+      margin-top: 20px;
+      width: 80%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .bar {
+      width: 0%;
+      height: 100%;
+      background: #00ffc6;
+      transition: width 0.3s;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      padding: 15px;
+    }
+
+    footer span {
+      color: #00ffc6;
       font-weight: bold;
     }
+  </style>
 
-  .container {
-    background: rgba(255,255,255,0.1);
-    padding: 30px 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
-
-  input[type="file"], input[type="number"], button {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    width: 220px;
-    margin: top 40px; ;
-  }
-
-  input[type="file"] {
-    background: #00ffc6;
-    color: #000;
-    margin-top: 40px;
-  }
-
-  input[type="number"] {
-    text-align: center;
-  }
-
-  button {
-    background: linear-gradient(135deg, #00ffc6, #00b8ff);
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  button:hover {
-    transform: scale(1.05);
-  }
-
-  .status {
-    margin-top: 15px;
-    color: #ddd;
-  }
-</style>
 </head>
+
 <body>
 
-  <h1> Segmentation </h1>
+  <h1>Segmentation de la vidéo</h1>
 
-  <div class="container">
+  <div class="form-box">
     <input type="file" id="videoFile" accept="video/*">
-    <input type="number" id="segmentDuration" placeholder="Durée du segment" min="1" value="10">
-    <button id="segmentBtn">Segmenter</button>
-    <p class="status" id="status"></p>
+    <input type="number" id="duration" placeholder="Durée (en secondes)" min="1" value="10">
+    <button id="startBtn">Démarrer la segmentation</button>
+
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <p id="statusMsg"></p>
   </div>
 
+  <footer><span>Imene</span> - <span>Alae</span></footer>
+
   <script>
-   document.getElementById('segmentBtn').addEventListener('click', async () => {
-  const fileInput = document.getElementById('videoFile');
-  const durationInput = document.getElementById('segmentDuration');
-  const status = document.getElementById('status');
+    const videoFile = document.getElementById("videoFile");
+    const durationInput = document.getElementById("duration");
+    const startBtn = document.getElementById("startBtn");
+    const statusMsg = document.getElementById("statusMsg");
+    const bar = document.getElementById("bar");
 
-  if (!fileInput.files.length) {
-    status.textContent = "⚠️ Veuillez importer une vidéo.";
-    return;
-  }
+    async function checkProgress() {
+      try {
+        const res = await fetch("/segments_info");
+        const data = await res.json();
 
-  const file = fileInput.files[0];
+        if (!data.ready) return 0;
 
-  // Vérifie que le fichier est bien une vidéo
-  if (!file.type.startsWith('video/')) {
-    status.textContent = "⚠️ Le fichier sélectionné n'est pas une vidéo !";
-    return;
-  }
+        const segments = data.segments.filter(Boolean);
+        const total = data.segments.length;
+        const done = segments.length;
 
-  const duration = durationInput.value;
+        return (done / total) * 100;
 
-  const formData = new FormData();
-  formData.append('video', file);
-  formData.append('duration', duration);
-
-  status.textContent = "⏳ Segmentation en cours...";
-
-  try {
-    const response = await fetch('http://127.0.0.1:5000/segment', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (response.ok) {
-      status.textContent = "✅ Segmentation terminée !";
-      const data = await response.json();
-      console.log(data);
-    } else {
-      status.textContent = "❌ Erreur côté serveur.";
+      } catch {
+        return 0;
+      }
     }
-  } catch (error) {
-    status.textContent = "❌ Erreur : " + error.message;
-  }
-});
 
+    startBtn.addEventListener("click", async () => {
+      const file = videoFile.files[0];
+      const duration = durationInput.value;
+
+      if (!file) return alert("⚠️ Veuillez sélectionner une vidéo !");
+
+      const formData = new FormData();
+      formData.append("video", file);
+      formData.append("duration", duration);
+
+      statusMsg.textContent = "⏳ Segmentation en cours...";
+      bar.style.width = "10%";
+
+      try {
+        const res = await fetch("/segment", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          statusMsg.textContent = "❌ Erreur : " + (data.error || "Inconnue");
+          return;
+        }
+
+        let progress = 10;
+
+        const interval = setInterval(async () => {
+          progress = await checkProgress();
+          bar.style.width = progress + "%";
+
+          if (progress >= 100) {
+            clearInterval(interval);
+            statusMsg.textContent = "✅ Segmentation terminée ! Redirection...";
+
+            setTimeout(() => (window.location.href = "/"), 1500);
+          }
+
+        }, 2000);
+
+      } catch (err) {
+        statusMsg.textContent = "❌ Erreur réseau.";
+        console.error(err);
+      }
+    });
   </script>
 
 </body>

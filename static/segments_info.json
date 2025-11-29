@@ -1,0 +1,62 @@
+[
+    {
+        "name": "segment_1.mp4",
+        "versions": {
+            "360p": "static/segments_resized/segment_1_360p.mp4",
+            "480p": "static/segments_resized/segment_1_480p.mp4",
+            "720p": "static/segments_resized/segment_1_720p.mp4",
+            "1080p": "static/segments_resized/segment_1_1080p.mp4",
+            "4k": "static/segments_resized/segment_1_4k.mp4"
+        }
+    },
+    {
+        "name": "segment_2.mp4",
+        "versions": {
+            "360p": "static/segments_resized/segment_2_360p.mp4",
+            "480p": "static/segments_resized/segment_2_480p.mp4",
+            "720p": "static/segments_resized/segment_2_720p.mp4",
+            "1080p": "static/segments_resized/segment_2_1080p.mp4",
+            "4k": "static/segments_resized/segment_2_4k.mp4"
+        }
+    },
+    {
+        "name": "segment_3.mp4",
+        "versions": {
+            "360p": "static/segments_resized/segment_3_360p.mp4",
+            "480p": "static/segments_resized/segment_3_480p.mp4",
+            "720p": "static/segments_resized/segment_3_720p.mp4",
+            "1080p": "static/segments_resized/segment_3_1080p.mp4",
+            "4k": "static/segments_resized/segment_3_4k.mp4"
+        }
+    },
+    {
+        "name": "segment_4.mp4",
+        "versions": {
+            "360p": "static/segments_resized/segment_4_360p.mp4",
+            "480p": "static/segments_resized/segment_4_480p.mp4",
+            "720p": "static/segments_resized/segment_4_720p.mp4",
+            "1080p": "static/segments_resized/segment_4_1080p.mp4",
+            "4k": "static/segments_resized/segment_4_4k.mp4"
+        }
+    },
+    {
+        "name": "segment_5.mp4",
+        "versions": {
+            "360p": "static/segments_resized/segment_5_360p.mp4",
+            "480p": "static/segments_resized/segment_5_480p.mp4",
+            "720p": "static/segments_resized/segment_5_720p.mp4",
+            "1080p": "static/segments_resized/segment_5_1080p.mp4",
+            "4k": "static/segments_resized/segment_5_4k.mp4"
+        }
+    },
+    {
+        "name": "segment_6.mp4",
+        "versions": {
+            "360p": "static/segments_resized/segment_6_360p.mp4",
+            "480p": "static/segments_resized/segment_6_480p.mp4",
+            "720p": "static/segments_resized/segment_6_720p.mp4",
+            "1080p": "static/segments_resized/segment_6_1080p.mp4",
+            "4k": "static/segments_resized/segment_6_4k.mp4"
+        }
+    }
+]
